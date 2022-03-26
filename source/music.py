@@ -12,28 +12,26 @@ from vk_api.exceptions import AuthError, AccessDenied
 class Music:
     def __init__(self, user: str, session: VKSession):
         """
-
-        :param user:
-        :param session:
+        Создание интерфейса доступа к музыке вконтакте с пользователем по умолчанию.
+        :param user: id пользователя или ссылка на его профиль.
+        :param session: Объект сессии с авторизованным пользователем.
         """
         self._api = session.api
         self._audio = session.audio
-        if user.isdigit():
-            self._user_id = user
-        else:
-            object_info = self._api.method(
-                'utils.resolveScreenName', {'screen_name': user}
-            )
-            if not object_info:
-                raise NonExistentUser(user)
-            self._user_id = object_info['object_id']
+        _user = self.screen_name(user)
+        object_info = self._api.method(
+            'utils.resolveScreenName', {'screen_name': _user}
+        )
+        if not object_info:
+            raise NonExistentUser(user)
+        self._user_id = object_info['object_id']
         self._user_info = self._api.method("users.get", {"user_ids": self._user_id})
 
     def playlists(self, owner_id: int) -> [Playlist]:
         """
-
-        :param owner_id:
-        :return:
+         Возвращает плейлисты указанного пользователя.
+        :param owner_id: id пользователя чьи плейлисты нужно найти.
+        :return: Список найденных плейлистов.
         """
         try:
             albums = self._audio.get_albums(owner_id, )
@@ -53,12 +51,19 @@ class Music:
 
     def search(self, text: str, count: int = 5, offset: int = 0, official=False) -> [Track]:
         """
-
-        :param text:
-        :param count:
-        :param offset:
-        :param official:
-        :return:
+        Поиск музыки по названию.
+        Приблизительно время скачивания:
+            1 аудиозапись - от ~3 сек,
+            5 аудиозапись - от ~7 сек,
+            10 аудиозапись - от ~11 сек,
+            15 аудиозапись - от ~15 сек.
+        :param text: Название песни, или её автор, или что-либо другое (Аналогично поиску в ВК).
+        :param count: Количество аудиозаписей которые должен вернуть поиск.
+        :param offset: Смещение от начала списка найденных аудиозаписей.
+        :param official: Возвращает только музыку от исполнителей (не от обычных пользователей).
+        *Так как применяется фильтрация по автору, то количество найденных аудиозаписей может
+        быть меньше заданного значения count.
+        :return: Список найденных аудиозаписей с учётом смещения.
         """
         tracks = self._audio.search(q=text, count=19 + count, offset=offset)
         if official:
@@ -76,27 +81,12 @@ class Music:
             for track in tracks
         ]
 
-    def search_generator(self, text: str, step: int = 5, count: int = 25, official=False) -> iter:
-        """
-
-        :param text:
-        :param step:
-        :param count:
-        :param official:
-        :return:
-        """
-        tracks = self.search(text=text, count=count, official=official)
-        _start, _step = 0, step
-        while _start < len(tracks):
-            yield tracks[_start:_start + _step]
-            _start += _step
-
     def track(self, owner_id: int, track_id: int) -> Track:
         """
-
-        :param owner_id:
-        :param track_id:
-        :return:
+        Аудиозапись.
+        :param owner_id: id владельца аудиозаписи.
+        :param track_id: id аудиозаписи.
+        :return: Аудиозапись.
         """
         track = self._audio.get_audio_by_id(owner_id=owner_id, audio_id=track_id)
         return Track(
@@ -109,16 +99,16 @@ class Music:
             title=track['title']
         )
 
-    def album_tracks(self, album: Playlist) -> [Track]:
+    def playlist_tracks(self, playlist: Playlist) -> [Track]:
         """
-
-        :param album:
-        :return:
+        Возвращает список аудиозаписей заданного плейлиста.
+        :param playlist: Плейлист чьи аудиозаписи нужно вернуть.
+        :return: Список аудиозаписей плейлиста.
         """
         tracks = self._audio.get(
-            album_id=album.id,
-            owner_id=album.owner_id,
-            access_hash=album.access_hash
+            album_id=playlist.id,
+            owner_id=playlist.owner_id,
+            access_hash=playlist.access_hash
         )
         return [
             Track(
@@ -136,23 +126,19 @@ class Music:
     async def download(
             self,
             *tracks: Track,
-            count: int = 5,
-            offset: int = 0,
             path: str = './',
             bitrate: int = 320
     ) -> [Track]:
         """
-
-        :param tracks:
-        :param count:
-        :param offset:
-        :param path:
-        :param bitrate:
-        :return:
+        Загружает аудиозаписи.
+        :param tracks: Аудиозаписи для скачивания.
+        :param path: Путь по которому будут сохранены аудиозаписи.
+        :param bitrate: Битрейт.
+        :return: Список аудиозаписей с установленным path.
         """
         to_download = []
         _tracks = tracks[0] if len(tracks) == 1 and isinstance(tracks[0], list | tuple) else tracks
-        for track in _tracks[offset:count + offset]:
+        for track in _tracks:
             track.path = str(PurePath(path, track.fullname + '.mp3'))
             to_download.append(self._downloader(track.url, track.path, bitrate=bitrate))
         await asyncio.gather(*to_download)
@@ -171,14 +157,15 @@ class Music:
         return self._user_info[0]['first_name']
 
     @staticmethod
-    async def _downloader(url: str, name: str, bitrate: int):
-        """
+    def screen_name(text: str) -> str:
+        if '/' in text:
+            text = text.replace('/', ' ').strip().split()[-1]
+        if text.isdigit():
+            text = 'id' + text
+        return text
 
-        :param url:
-        :param name:
-        :param bitrate:
-        :return:
-        """
+    @staticmethod
+    async def _downloader(url: str, name: str, bitrate: int):
         if bitrate not in (320, 192, 256, 128, 160, 6, 32):
             raise InvalidBitrate(bitrate)
         await FFmpeg().option('y').option(
