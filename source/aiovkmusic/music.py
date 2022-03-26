@@ -179,4 +179,4 @@ class Music:
     @staticmethod
     def _mkdir(dirname: str):
         if dirname not in ('./', '.', ''):
-            os.makedirs(PurePath(dirname), exist_ok=False)
+            os.makedirs(PurePath(dirname), exist_ok=True)
