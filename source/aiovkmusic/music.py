@@ -103,7 +103,7 @@ class Music:
         быть меньше заданного значения count.
         :return: Список найденных аудиозаписей с учётом смещения.
         """
-        tracks = self._audio.search(q=text, count=19 + count, offset=offset)
+        tracks = self._audio.search(q=text, count=10 + count, offset=offset)
         if official:
             tracks = list(filter(lambda t: t['owner_id'] < 0, tracks))[0:count]
         return [
@@ -193,7 +193,7 @@ class Music:
 
     @property
     def last_name(self) -> str:
-        return self._user_info[0]['first_name']
+        return self._user_info[0]['last_name']
 
     @staticmethod
     def screen_name(text: str) -> str:
