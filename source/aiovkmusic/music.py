@@ -30,7 +30,9 @@ class Music:
 
     def playlists(self, owner_id: int | None = None) -> [Playlist]:
         """
-         Возвращает плейлисты указанного пользователя.
+        Возвращает плейлисты указанного пользователя.
+        Если не указывать owner_id, то по умолчанию
+        используется id заданного в экземпляре класса пользователя (self.user_id).
         :param owner_id: id пользователя чьи плейлисты нужно найти.
         :return: Список найденных плейлистов.
         """
@@ -50,6 +52,40 @@ class Music:
             )
             for album in albums
         ]
+
+    def user_tracks(self, user_id: int | None = None, count: int = 5, offset: int = 0) -> [Track]:
+        """
+        Возвращает сохранённые аудиозаписи указанного пользователя.
+        Если не указывать user_id, то по умолчанию
+        используется id заданного в экземпляре класса пользователя (self.user_id).
+        :param user_id: id пользователя чьи сохранённые аудиозаписи нужно вернуть.
+        :param count: Количество аудиозаписей, которые нужно вернуть.
+        :param offset: Смещение по сохранённым аудиозаписям пользователя.
+        :return: Список найденных аудиозаписей с учётом смещения.
+        """
+        _owner_id = user_id if user_id else self.user_id
+        i = -1
+        tracks = []
+        for track in self._audio.get_iter(owner_id=_owner_id):
+            i += 1
+            if i == count + offset:
+                break
+            elif i < offset:
+                continue
+            else:
+                tracks.append(
+                    Track(
+                        id=track['id'],
+                        owner_id=track['owner_id'],
+                        duration=track['duration'],
+                        url=track['url'],
+                        _covers=track['track_covers'],
+                        artist=track['artist'],
+                        title=track['title']
+                    )
+                )
+
+        return tracks
 
     def search(self, text: str, count: int = 5, offset: int = 0, official=False) -> [Track]:
         """
