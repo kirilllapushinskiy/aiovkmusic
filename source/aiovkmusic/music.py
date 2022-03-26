@@ -1,4 +1,5 @@
 import asyncio
+import os
 from pathlib import PurePath
 
 from ffmpeg import FFmpeg
@@ -136,6 +137,7 @@ class Music:
         :param bitrate: Битрейт.
         :return: Список аудиозаписей с установленным path.
         """
+        self._mkdir(path)
         to_download = []
         _tracks = tracks[0] if len(tracks) == 1 and isinstance(tracks[0], list | tuple) else tracks
         for track in _tracks:
@@ -173,3 +175,8 @@ class Music:
         ).input(url).output(
             name, {'b:a': f'{bitrate}k'}
         ).execute()
+
+    @staticmethod
+    def _mkdir(dirname: str):
+        if dirname not in ('./', '.', ''):
+            os.makedirs(PurePath(dirname), exist_ok=False)
