@@ -4,6 +4,12 @@ from vk_api.exceptions import AuthError
 
 class VKSession:
     def __init__(self, login: str, password: str, session_file_path: str = 'vk_session.json'):
+        """
+        Авторизация с получением к vk api - создание сессии.
+        :param login: Логин пользователя (телефон, почта).
+        :param password: Пароль пользователя вконтакте.
+        :param session_file_path: Путь к файлу для сохранения сессии.
+        """
         try:
             self.__vk_session = VkApi(
                 login=login,
