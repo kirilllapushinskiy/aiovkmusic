@@ -6,55 +6,59 @@ ___
 ___
 Сразу же перейдём к примерам использования:
 ```python
+import asyncio
 from aiovkmusic import Music, VKSession, Track, Playlist
 
-session = VKSession(
-    login='<номер_телефона/электронная_почта>',
-    password='<пароль_от_вконтакте>',
-    session_file_path='session.json'
-)
-
-music = Music(user='<ссылка_на_профиль>', session=session)
-
-playlists = music.playlists(owner_id=music.user_id) # -> [Playlists]
+async def main():
+    session = VKSession(
+        login='<номер_телефона/электронная_почта>',
+        password='<пароль_от_вконтакте>',
+        session_file_path='session.json'
+    )
     
-    for playlist in playlists:
-        print(playlist.title)
-        
-# pyrokinesis
-# GAME OVER
-# Live Rock
-
-playlist_tracks = music.playlist_tracks(playlists[0]) # -> [Track]
+    music = Music(user='<ссылка_на_профиль>', session=session)
     
-    for track in playlist_tracks:
-        print(track.fullname)
+    playlists = music.playlists(owner_id=music.user_id) # -> [Playlists]
         
-# 99 Problems - Big Baby Tape kizaru
-# So Icy Nihao - Big Baby Tape kizaru
-# Big Tymers - Big Baby Tape kizaru
-
-tracks = music.search('Три дня дождя', count=5, offset=0, official=True) # -> [Track]
-
-    for track in tracks:
-        print(track.fullname)
-        
-# Вина - Три дня дождя
-# Демоны - Три дня дождя
-# Привычка - Три дня дождя
-# Не выводи меня - МУККА Три дня дождя
-# Не Киряй - МУККА Три дня дождя
-
-downloaded_tracks = await music.download(tracks, bitrate=320, path='music') # -> [Track]
+        for playlist in playlists:
+            print(playlist.title)
+            
+    # pyrokinesis
+    # GAME OVER
+    # Live Rock
     
-    for track in downloaded_tracks:
-        print(track.path)
+    playlist_tracks = music.playlist_tracks(playlists[0]) # -> [Track]
+        
+        for track in playlist_tracks:
+            print(track.fullname)
+            
+    # 99 Problems - Big Baby Tape kizaru
+    # So Icy Nihao - Big Baby Tape kizaru
+    # Big Tymers - Big Baby Tape kizaru
+    
+    tracks = music.search('Три дня дождя', count=5, offset=0, official=True) # -> [Track]
+    
+        for track in tracks:
+            print(track.fullname)
+            
+    # Вина - Три дня дождя
+    # Демоны - Три дня дождя
+    # Привычка - Три дня дождя
+    # Не выводи меня - МУККА Три дня дождя
+    # Не Киряй - МУККА Три дня дождя
+    
+    downloaded_tracks = await music.download(tracks, bitrate=320, path='music') # -> [Track]
+        
+        for track in downloaded_tracks:
+            print(track.path)
+    
+    # music/Вина - Три дня дождя.mp3
+    # music/Демоны - Три дня дождя.mp3
+    # music/Привычка - Три дня дождя.mp3
+    # music/Не выводи меня - МУККА Три дня дождя.mp3
+    # music/Не Киряй - МУККА Три дня дождя.mp3
 
-# music/Вина - Три дня дождя.mp3
-# music/Демоны - Три дня дождя.mp3
-# music/Привычка - Три дня дождя.mp3
-# music/Не выводи меня - МУККА Три дня дождя.mp3
-# music/Не Киряй - МУККА Три дня дождя.mp3
+asyncio.run(main())
 ```
 
 Используемые представления данных:
@@ -75,7 +79,6 @@ class Track:
     artist: str
     title: str
     duration: int
-    _covers: [str] 
     path: str
     fullname: str
 ```
