@@ -28,16 +28,17 @@ class Music:
         self._user_id = object_info['object_id']
         self._user_info = self._api.method("users.get", {"user_ids": self._user_id})
 
-    def playlists(self, owner_id: int) -> [Playlist]:
+    def playlists(self, owner_id: int | None = None) -> [Playlist]:
         """
          Возвращает плейлисты указанного пользователя.
         :param owner_id: id пользователя чьи плейлисты нужно найти.
         :return: Список найденных плейлистов.
         """
+        _owner_id = owner_id if owner_id else self.user_id
         try:
-            albums = self._audio.get_albums(owner_id, )
+            albums = self._audio.get_albums(owner_id=_owner_id)
         except AccessDenied:
-            raise PlaylistsAccessDenied(owner_id)
+            raise PlaylistsAccessDenied(_owner_id)
         return [
             Playlist(
                 id=album['id'],
