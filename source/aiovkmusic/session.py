@@ -1,5 +1,7 @@
 from vk_api import audio, VkApi
-from vk_api.exceptions import AuthError
+from vk_api.exceptions import AuthError, ApiError, Captcha
+
+from .exceptions import AuthorizationError, AwaitedCaptcha
 
 
 class VKSession:
@@ -18,8 +20,13 @@ class VKSession:
             )
             self.__vk_session.auth(token_only=True)
         except AuthError as err:
-            print("VKSession error:", err)
-        self.__vk_audio = audio.VkAudio(self.__vk_session)
+            raise AuthorizationError() from err
+        except Captcha:
+            raise AwaitedCaptcha()
+        try:
+            self.__vk_audio = audio.VkAudio(self.__vk_session)
+        except ApiError as err:
+            raise AuthorizationError() from err
 
     @property
     def api(self) -> VkApi:
