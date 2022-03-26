@@ -142,7 +142,7 @@ class Music:
             track.path = str(PurePath(path, track.fullname + '.mp3'))
             to_download.append(self._downloader(track.url, track.path, bitrate=bitrate))
         await asyncio.gather(*to_download)
-        return tracks
+        return _tracks
 
     @property
     def user_id(self) -> int:
