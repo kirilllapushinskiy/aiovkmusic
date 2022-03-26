@@ -2,7 +2,8 @@
 ### Описание
 > *Python пакет для поиска музыки и плейлистов в VK с возможностью асинхронного скачивания аудиозаписей.*
 ___
-#### ***Установка*** [aiovkmusic](https://pypi.org/project/aiovkmusic/) средствами [PyPi](https://pypi.org/) with pip: `pip install aiovkmusic`
+* #### ***Установка*** [aiovkmusic](https://pypi.org/project/aiovkmusic/) средствами [PyPi](https://pypi.org/) with pip: `pip install aiovkmusic`
+* #### И проверьте что на ваш компьютер установлен [ffmpeg](https://ffmpeg.org/download.html).
 ___
 Сразу же перейдём к примерам использования:
 ```python
