@@ -10,3 +10,6 @@ All notable changes to this project will be documented in this file.
 
 ## 1.1.0
 - Добавлен новый метод: user_tracks(), который возвращает список аудиозаписей указанного пользователя.
+
+## 1.2.0
+- Добавлены новые исключения.
