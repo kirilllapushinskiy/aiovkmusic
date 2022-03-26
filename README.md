@@ -24,8 +24,8 @@ async def main():
     # Получение всех плейлистов указанного пользователя.
     playlists = music.playlists(owner_id=music.user_id) # -> [Playlists]
         
-        for playlist in playlists:
-            print(playlist.title)
+    for playlist in playlists:
+        print(playlist.title)
             
     # pyrokinesis
     # GAME OVER
@@ -34,8 +34,8 @@ async def main():
     # Получение аудиозаписей указанного плейлиста.
     playlist_tracks = music.playlist_tracks(playlists[0]) # -> [Track]
         
-        for track in playlist_tracks:
-            print(track.fullname)
+    for track in playlist_tracks:
+        print(track.fullname)
             
     # 99 Problems - Big Baby Tape kizaru
     # So Icy Nihao - Big Baby Tape kizaru
@@ -44,8 +44,8 @@ async def main():
     # Поиск по названию (аналогично поиску в VK).
     tracks = music.search('Три дня дождя', count=5, offset=0, official=True) # -> [Track]
     
-        for track in tracks:
-            print(track.fullname)
+    for track in tracks:
+        print(track.fullname)
             
     # Вина - Три дня дождя
     # Демоны - Три дня дождя
@@ -56,8 +56,8 @@ async def main():
     # Загрузка переданных аудиозаписей по указанному пути.
     downloaded_tracks = await music.download(tracks, bitrate=320, path='music') # -> [Track]
         
-        for track in downloaded_tracks:
-            print(track.path)
+    for track in downloaded_tracks:
+        print(track.path)
     
     # music/Вина - Три дня дождя.mp3
     # music/Демоны - Три дня дождя.mp3
