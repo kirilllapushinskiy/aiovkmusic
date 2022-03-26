@@ -10,14 +10,17 @@ import asyncio
 from aiovkmusic import Music, VKSession, Track, Playlist
 
 async def main():
+    # Создание сессии.
     session = VKSession(
         login='<номер_телефона/электронная_почта>',
         password='<пароль_от_вконтакте>',
         session_file_path='session.json'
     )
     
+    # Получение интерфейса к vk music api.
     music = Music(user='<ссылка_на_профиль>', session=session)
     
+    # Получение всех плейлистов указанного пользователя.
     playlists = music.playlists(owner_id=music.user_id) # -> [Playlists]
         
         for playlist in playlists:
@@ -27,6 +30,7 @@ async def main():
     # GAME OVER
     # Live Rock
     
+    # Получение аудиозаписей указанного плейлиста.
     playlist_tracks = music.playlist_tracks(playlists[0]) # -> [Track]
         
         for track in playlist_tracks:
@@ -36,6 +40,7 @@ async def main():
     # So Icy Nihao - Big Baby Tape kizaru
     # Big Tymers - Big Baby Tape kizaru
     
+    # Поиск по названию (аналогично поиску в VK).
     tracks = music.search('Три дня дождя', count=5, offset=0, official=True) # -> [Track]
     
         for track in tracks:
@@ -47,6 +52,7 @@ async def main():
     # Не выводи меня - МУККА Три дня дождя
     # Не Киряй - МУККА Три дня дождя
     
+    # Загрузка переданных аудиозаписей по указанному пути.
     downloaded_tracks = await music.download(tracks, bitrate=320, path='music') # -> [Track]
         
         for track in downloaded_tracks:
