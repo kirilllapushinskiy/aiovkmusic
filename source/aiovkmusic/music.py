@@ -9,6 +9,8 @@ from .model import Track, Playlist
 from .session import VKSession
 from vk_api import exceptions as vk_api_exceptions
 
+SEARCH_MISS_NUMBER = 5
+
 
 class Music:
     def __init__(self, user: str, session: VKSession):
@@ -106,21 +108,33 @@ class Music:
         быть меньше заданного значения count.
         :return: Список найденных аудиозаписей с учётом смещения.
         """
-        tracks = self._audio.search(q=text, count=10 + count, offset=offset)
-        if official:
-            tracks = list(filter(lambda t: t['owner_id'] < 0, tracks))[0:count]
-        return [
-            Track(
-                id=track['id'],
-                owner_id=track['owner_id'],
-                duration=track['duration'],
-                url=track['url'],
-                _covers=track['track_covers'],
-                artist=track['artist'],
-                title=track['title']
-            )
-            for track in tracks
-        ]
+        search_generator = self._audio.search_iter(q=text, offset=offset)
+        i = 0
+        miss = 0
+        tracks = []
+        while i < count:
+            track = next(search_generator)
+            if official:
+                if track['owner_id'] < 0:
+                    tracks.append(Track(
+                        id=track['id'],
+                        owner_id=track['owner_id'],
+                        duration=track['duration'],
+                        url=track['url'],
+                        _covers=track['track_covers'],
+                        artist=track['artist'],
+                        title=track['title']
+                    ))
+                    i += 1
+                    miss = 0
+                else:
+                    if miss > SEARCH_MISS_NUMBER:
+                        break
+                    miss += 1
+            else:
+                tracks.append(track)
+
+        return tracks
 
     def track(self, owner_id: int, track_id: int) -> Track:
         """
