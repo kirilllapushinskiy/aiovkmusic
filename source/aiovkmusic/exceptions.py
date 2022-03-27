@@ -1,6 +1,14 @@
 class PlaylistsAccessDenied(Exception):
     def __init__(self, owner_id):
-        self.message = f'У вас не прав доступа для просмотра плейлистов данного пользователя({owner_id}).'
+        self.message = f'У вас не прав доступа для просмотра плейлистов данного пользователя ({owner_id}).'
+
+    def __str__(self):
+        return self.message
+
+
+class TracksAccessDenied(Exception):
+    def __init__(self, owner_id):
+        self.message = f'У вас не прав доступа для просмотра аудиозаписей данного пользователя ({owner_id}).'
 
     def __str__(self):
         return self.message

@@ -4,10 +4,10 @@ from pathlib import PurePath
 
 from ffmpeg import FFmpeg
 
-from .exceptions import PlaylistsAccessDenied, NonExistentUser, InvalidBitrate
+from .exceptions import PlaylistsAccessDenied, NonExistentUser, InvalidBitrate, TracksAccessDenied
 from .model import Track, Playlist
 from .session import VKSession
-from vk_api.exceptions import AuthError, AccessDenied
+from vk_api import exceptions as vk_api_exceptions
 
 
 class Music:
@@ -39,7 +39,7 @@ class Music:
         _owner_id = owner_id if owner_id else self.user_id
         try:
             albums = self._audio.get_albums(owner_id=_owner_id)
-        except AccessDenied:
+        except vk_api_exceptions.AccessDenied:
             raise PlaylistsAccessDenied(_owner_id)
         return [
             Playlist(
@@ -66,24 +66,27 @@ class Music:
         _owner_id = user_id if user_id else self.user_id
         i = -1
         tracks = []
-        for track in self._audio.get_iter(owner_id=_owner_id):
-            i += 1
-            if i == count + offset:
-                break
-            elif i < offset:
-                continue
-            else:
-                tracks.append(
-                    Track(
-                        id=track['id'],
-                        owner_id=track['owner_id'],
-                        duration=track['duration'],
-                        url=track['url'],
-                        _covers=track['track_covers'],
-                        artist=track['artist'],
-                        title=track['title']
+        try:
+            for track in self._audio.get_iter(owner_id=_owner_id):
+                i += 1
+                if i == count + offset:
+                    break
+                elif i < offset:
+                    continue
+                else:
+                    tracks.append(
+                        Track(
+                            id=track['id'],
+                            owner_id=track['owner_id'],
+                            duration=track['duration'],
+                            url=track['url'],
+                            _covers=track['track_covers'],
+                            artist=track['artist'],
+                            title=track['title']
+                        )
                     )
-                )
+        except vk_api_exceptions.AccessDenied:
+            raise TracksAccessDenied(_owner_id)
 
         return tracks
 
