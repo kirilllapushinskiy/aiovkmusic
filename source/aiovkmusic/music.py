@@ -116,24 +116,22 @@ class Music:
             track = next(search_generator)
             if official:
                 if track['owner_id'] < 0:
-                    tracks.append(Track(
-                        id=track['id'],
-                        owner_id=track['owner_id'],
-                        duration=track['duration'],
-                        url=track['url'],
-                        _covers=track['track_covers'],
-                        artist=track['artist'],
-                        title=track['title']
-                    ))
-                    i += 1
                     miss = 0
                 else:
                     if miss > SEARCH_MISS_NUMBER:
                         break
                     miss += 1
-            else:
-                tracks.append(track)
-
+                    continue
+            i += 1
+            tracks.append(Track(
+                id=track['id'],
+                owner_id=track['owner_id'],
+                duration=track['duration'],
+                url=track['url'],
+                _covers=track['track_covers'],
+                artist=track['artist'],
+                title=track['title']
+            ))
         return tracks
 
     def track(self, owner_id: int, track_id: int) -> Track:
