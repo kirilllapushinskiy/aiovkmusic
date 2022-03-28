@@ -92,7 +92,7 @@ class Music:
 
         return tracks
 
-    def search(self, text: str, count: int = 5, offset: int = 0, official=False) -> [Track]:
+    def search(self, text: str, count: int = 5, offset: int = 0, official=False, official_first=False) -> [Track]:
         """
         Поиск музыки по названию.
         Приблизительно время скачивания:
@@ -100,6 +100,7 @@ class Music:
             5 аудиозапись - от ~7 сек,
             10 аудиозапись - от ~11 сек,
             15 аудиозапись - от ~15 сек.
+        :param official_first: Сначала будут идти официальные аудиозаписи, а затем неофициальные.
         :param text: Название песни, или её автор, или что-либо другое (Аналогично поиску в ВК).
         :param count: Количество аудиозаписей которые должен вернуть поиск.
         :param offset: Смещение от начала списка найденных аудиозаписей.
@@ -132,7 +133,17 @@ class Music:
                 artist=track['artist'],
                 title=track['title']
             ))
-        return tracks
+        if not official and official_first:
+            _official = []
+            _non_official = []
+            for t in tracks:
+                if t.owner_id < 0:
+                    _official.append(t)
+                else:
+                    _non_official.append(t)
+            return _official + _non_official
+        else:
+            return tracks
 
     def track(self, owner_id: int, track_id: int) -> Track:
         """
