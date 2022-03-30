@@ -31,4 +31,4 @@ class Track:
 
     @staticmethod
     def _clear_str(string):
-        return ''.join(c for c in string if c.isalnum() or c == ' ')
+        return ''.join(c for c in string if c.isalnum() or c in ' -')
