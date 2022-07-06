@@ -1,6 +1,7 @@
 import asyncio
 import os
 from pathlib import PurePath
+from typing import Optional
 
 from ffmpeg import FFmpeg
 
@@ -30,7 +31,7 @@ class Music:
         self._user_id = object_info['object_id']
         self._user_info = self._api.method("users.get", {"user_ids": self._user_id})
 
-    def playlists(self, owner_id: int | None = None) -> [Playlist]:
+    def playlists(self, owner_id: Optional[int] = None) -> [Playlist]:
         """
         Возвращает плейлисты указанного пользователя.
         Если не указывать owner_id, то по умолчанию
@@ -55,7 +56,7 @@ class Music:
             for album in albums
         ]
 
-    def user_tracks(self, user_id: int | None = None, count: int = 5, offset: int = 0) -> [Track]:
+    def user_tracks(self, user_id: Optional[int] = None, count: int = 5, offset: int = 0) -> [Track]:
         """
         Возвращает сохранённые аудиозаписи указанного пользователя.
         Если не указывать user_id, то по умолчанию
@@ -112,6 +113,7 @@ class Music:
         search_generator = self._audio.search_iter(q=text, offset=offset)
         i = 0
         miss = 0
+        unique = set()
         tracks = []
         while i < count:
             track = next(search_generator)
@@ -124,6 +126,9 @@ class Music:
                     miss += 1
                     continue
             i += 1
+            if track['id'] in unique:
+                continue
+            unique.add(track['id'])
             tracks.append(Track(
                 id=track['id'],
                 owner_id=track['owner_id'],
@@ -204,7 +209,7 @@ class Music:
         to_download = []
         _tracks = tracks[0] if len(tracks) == 1 and isinstance(tracks[0], list | tuple) else tracks
         for track in _tracks:
-            track.path = str(PurePath(path, track.fullname + '.mp3'))
+            track.path = str(PurePath(path, f'{track.id}.mp3'))
             to_download.append(self._downloader(track.url, track.path, bitrate=bitrate))
         await asyncio.gather(*to_download)
         return _tracks
