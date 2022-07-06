@@ -5,6 +5,8 @@
 > *Python пакет для поиска музыки и плейлистов в VK с возможностью асинхронного скачивания аудиозаписей.*
 ___
 
+[Что нового в последней версии?](CHANGES.md)
+
 * #### 
   Установка [aiovkmusic](https://pypi.org/project/aiovkmusic/) средствами [PyPi](https://pypi.org/): `pip install aiovkmusic`
 * #### И убедитесь, что на ваш компьютер установлен [ffmpeg](https://ffmpeg.org/download.html).
@@ -66,11 +68,11 @@ async def main():
     for track in downloaded_tracks:
         print(track.path)
 
-    # music/Вина - Три дня дождя.mp3
-    # music/Демоны - Три дня дождя.mp3
-    # music/Привычка - Три дня дождя.mp3
-    # music/Не выводи меня - МУККА Три дня дождя.mp3
-    # music/Не Киряй - МУККА Три дня дождя.mp3
+    # music/108481371.mp3
+    # music/62163423.mp3
+    # music/106817510.mp3
+    # music/60284123.mp3
+    # music/105514252.mp3
 
     #
     # <--- NEW IN VERSION 1.1.0! --->
