@@ -1,5 +1,5 @@
-from vk_api import audio, VkApi
-from vk_api.exceptions import AuthError, ApiError, Captcha
+from ..vkapi import audio, VkApi
+from ..vkapi.exceptions import AuthError, ApiError, Captcha
 
 from .exceptions import AuthorizationError, AwaitedCaptcha
 

@@ -5,8 +5,8 @@ name = "pypi"
 
 [packages]
 python-ffmpeg = "*"
-vk-api = "*"
-bs4 = "*"
+beautifulsoup4 = "*"
+loguru = "*"
 
 [dev-packages]
 pytest = "*"

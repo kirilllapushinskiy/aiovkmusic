@@ -8,7 +8,7 @@ from ffmpeg import FFmpeg
 from .exceptions import PlaylistsAccessDenied, NonExistentUser, InvalidBitrate, TracksAccessDenied
 from .model import Track, Playlist
 from .session import VKSession
-from vk_api import exceptions as vk_api_exceptions
+from ..vkapi import exceptions as vk_api_exceptions
 
 SEARCH_MISS_NUMBER = 5
 
@@ -30,6 +30,14 @@ class Music:
             raise NonExistentUser(user)
         self._user_id = object_info['object_id']
         self._user_info = self._api.method("users.get", {"user_ids": self._user_id})
+
+    def is_public(self) -> bool:
+        try:
+            self.user_tracks(count=1)
+            self.playlists()
+        except (PlaylistsAccessDenied, TracksAccessDenied):
+            return False
+        return True
 
     def playlists(self, owner_id: Optional[int] = None) -> [Playlist]:
         """
@@ -116,7 +124,10 @@ class Music:
         unique = set()
         tracks = []
         while i < count:
-            track = next(search_generator)
+            try:
+                track = next(search_generator)
+            except StopIteration:
+                return tracks
             if official:
                 if track['owner_id'] < 0:
                     miss = 0
@@ -197,7 +208,7 @@ class Music:
             *tracks: Track,
             path: str = './',
             bitrate: int = 320
-    ) -> [Track]:
+    ):
         """
         Загружает аудиозаписи.
         :param tracks: Аудиозаписи для скачивания.
@@ -206,13 +217,15 @@ class Music:
         :return: Список аудиозаписей с установленным path.
         """
         self._mkdir(path)
-        to_download = []
-        _tracks = tracks[0] if len(tracks) == 1 and isinstance(tracks[0], list | tuple) else tracks
-        for track in _tracks:
-            track.path = str(PurePath(path, f'{track.id}.mp3'))
-            to_download.append(self._downloader(track.url, track.path, bitrate=bitrate))
-        await asyncio.gather(*to_download)
-        return _tracks
+        if len(tracks) == 1:
+            tracks[0].path = str(PurePath(path, f'{tracks[0].id}.mp3'))
+            await self._downloader(tracks[0].url, tracks[0].path, bitrate=bitrate)
+        else:
+            to_download = []
+            for track in tracks:
+                track.path = str(PurePath(path, f'{track.id}.mp3'))
+                to_download.append(self._downloader(track.url, track.path, bitrate=bitrate))
+            await asyncio.gather(*to_download)
 
     @property
     def user_id(self) -> int:
