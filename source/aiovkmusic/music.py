@@ -5,10 +5,9 @@ from typing import Optional
 
 from ffmpeg import FFmpeg
 
-from .exceptions import PlaylistsAccessDenied, NonExistentUser, InvalidBitrate, TracksAccessDenied
+from .exceptions import *
 from .model import Track, Playlist
 from .session import VKSession
-from ..vkapi import exceptions as vk_api_exceptions
 
 SEARCH_MISS_NUMBER = 5
 
@@ -50,7 +49,7 @@ class Music:
         _owner_id = owner_id if owner_id else self.user_id
         try:
             albums = self._audio.get_albums(owner_id=_owner_id)
-        except vk_api_exceptions.AccessDenied:
+        except AccessDenied:
             raise PlaylistsAccessDenied(_owner_id)
         return [
             Playlist(
@@ -96,7 +95,7 @@ class Music:
                             title=track['title']
                         )
                     )
-        except vk_api_exceptions.AccessDenied:
+        except AccessDenied:
             raise TracksAccessDenied(_owner_id)
 
         return tracks

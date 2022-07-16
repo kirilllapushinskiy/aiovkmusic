@@ -17,7 +17,7 @@ from hashlib import md5
 
 import requests
 
-from .. import jconfig
+from . import jconfig
 from .enums import VkUserPermissions
 from .exceptions import *
 from .utils import (
