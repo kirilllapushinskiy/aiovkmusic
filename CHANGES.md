@@ -51,3 +51,7 @@ All notable changes to this project will be documented in this file.
 ## 1.6.1
 
 - Исправлена ошибка относительного импорта.
+
+## 1.6.2
+
+- Обновление куки и повторный запрос при ошибке поиска.

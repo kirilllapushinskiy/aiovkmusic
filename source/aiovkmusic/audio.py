@@ -109,12 +109,28 @@ class VkAudio(object):
 
         offset = 0
         while True:
-            content_type = ''
-            raw = ''
             retries = RETRIES
+            raw = self._vk.http.post(
+                'https://m.vk.com/audio',
+                data={
+                    'act': 'load_section',
+                    'owner_id': owner_id,
+                    'playlist_id': album_id if album_id else -1,
+                    'offset': offset,
+                    'type': 'playlist',
+                    'access_hash': access_hash,
+                    'is_loading_all': 1
+                },
+                headers=ACCEPT_HEADER,
+                allow_redirects=True
+            )
+            content_type = raw.headers['Content-Type']
+            loguru.logger.info(
+                f"'From user {owner_id} audio load_section response {raw.status_code}: {content_type}"
+            )
+
             while retries and content_type != CONTENT_TYPE:
-                if retries < RETRIES:
-                    self._vk.http.get('https://m.vk.com/')
+                self._vk.http.get('https://m.vk.com/')
                 raw = self._vk.http.post(
                     'https://m.vk.com/audio',
                     data={
@@ -131,8 +147,8 @@ class VkAudio(object):
                 )
                 content_type = raw.headers['Content-Type']
                 retries -= 1
-                loguru.logger.info(
-                    f"'From user {owner_id} audio load_section response {raw.status_code}: {content_type}"
+                loguru.logger.warning(
+                    f"'Re-try from user {owner_id} audio load_section response {raw.status_code}: {content_type}"
                 )
 
             response = raw.json()
@@ -308,8 +324,30 @@ class VkAudio(object):
 
         json_response = json.loads(response.text.replace('<!--', ''))
 
-        while type(json_response) is dict and type(json_response['payload'][1][1]) is dict and \
-                json_response['payload'][1][1]['playlist']:
+        while True:
+            if type(json_response) is not dict or type(json_response['payload'][1][1]) is not dict:
+                set_cookies_from_list(self._vk.http.cookies, self.DEFAULT_COOKIES)
+                self._vk.http.get('https://m.vk.com/')  # load cookies
+                response = self._vk.http.post(
+                    'https://vk.com/al_audio.php',
+                    data={
+                        'al': 1,
+                        'act': 'section',
+                        'claim': 0,
+                        'is_layer': 0,
+                        'owner_id': self.user_id,
+                        'section': 'search',
+                        'q': q
+                    }
+                )
+                json_response = json.loads(response.text.replace('<!--', ''))
+                loguru.logger.warning(
+                    f"Re-try query '{q}' section response {response.status_code}: {response.headers['Content-Type']}"
+                )
+                continue
+
+            if not json_response['payload'][1][1]['playlist']:
+                break
 
             ids = scrap_ids(
                 json_response['payload'][1][1]['playlist']['list']
