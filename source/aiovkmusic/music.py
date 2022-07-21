@@ -9,7 +9,7 @@ from .exceptions import *
 from .model import Track, Playlist
 from .session import VKSession
 
-SEARCH_MISS_NUMBER = 5
+SEARCH_MISS_NUMBER = 3
 
 
 class Music:
@@ -119,7 +119,7 @@ class Music:
         """
         search_generator = self._audio.search_iter(q=text, offset=offset)
         i = 0
-        miss = 0
+        official_miss = 0
         unique = set()
         tracks = []
         while i < count:
@@ -129,15 +129,15 @@ class Music:
                 return tracks
             if official:
                 if track['owner_id'] < 0:
-                    miss = 0
+                    official_miss = 0
                 else:
-                    if miss > SEARCH_MISS_NUMBER:
+                    if official_miss > SEARCH_MISS_NUMBER:
                         break
-                    miss += 1
+                    official_miss += 1
                     continue
             i += 1
             if track['id'] in unique:
-                continue
+                break
             unique.add(track['id'])
             tracks.append(Track(
                 id=track['id'],
