@@ -33,7 +33,6 @@ class Music:
     def is_public(self) -> bool:
         try:
             self.user_tracks(count=1)
-            self.playlists()
         except (PlaylistsAccessDenied, TracksAccessDenied):
             return False
         return True

@@ -131,25 +131,11 @@ class VkAudio(object):
 
             while retries and content_type != CONTENT_TYPE:
                 self._vk.http.get('https://m.vk.com/')
-                raw = self._vk.http.post(
-                    'https://m.vk.com/audio',
-                    data={
-                        'act': 'load_section',
-                        'owner_id': owner_id,
-                        'playlist_id': album_id if album_id else -1,
-                        'offset': offset,
-                        'type': 'playlist',
-                        'access_hash': access_hash,
-                        'is_loading_all': 1
-                    },
-                    headers=ACCEPT_HEADER,
-                    allow_redirects=True
-                )
-                content_type = raw.headers['Content-Type']
                 retries -= 1
                 loguru.logger.warning(
                     f"'Re-try from user {owner_id} audio load_section response {raw.status_code}: {content_type}"
                 )
+                continue
 
             response = raw.json()
 
@@ -202,6 +188,7 @@ class VkAudio(object):
             owner_id = self.user_id
 
         offset = 0
+        retries = 3
 
         while True:
             response = self._vk.http.get(
@@ -213,6 +200,12 @@ class VkAudio(object):
                 },
                 allow_redirects=False
             )
+
+            if response.status_code == 302 and retries:
+                self._vk.http.get('https://m.vk.com/')
+                loguru.logger.warning(f"Re-try get user {owner_id} playlists.")
+                retries -= 1
+                continue
 
             if not response.text:
                 raise AccessDenied(
