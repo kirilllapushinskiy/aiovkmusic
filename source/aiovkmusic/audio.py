@@ -108,8 +108,9 @@ class VkAudio(object):
         else:
             offset_diff = TRACKS_PER_USER_PAGE
 
+        retries = RETRIES
+
         while True:
-            retries = RETRIES
             raw = self._vk.http.post(
                 'https://m.vk.com/audio',
                 data={
@@ -129,7 +130,7 @@ class VkAudio(object):
                 f"'From user {owner_id} audio load_section response {raw.status_code}: {content_type}"
             )
 
-            while retries and content_type != CONTENT_TYPE:
+            if retries and content_type != CONTENT_TYPE:
                 self._vk.http.get('https://m.vk.com/')
                 retries -= 1
                 loguru.logger.warning(
