@@ -65,3 +65,7 @@ All notable changes to this project will be documented in this file.
 
 - Для метода playlist_tracks добавлены параметры: offset и count.
 - Исправлена ошибка некорректного повторного запроса.
+
+## 1.6.5
+
+- Мелкие исправления.

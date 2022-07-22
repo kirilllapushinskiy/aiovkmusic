@@ -195,7 +195,6 @@ class Music:
         tracks = []
 
         while count:
-            print(count)
             try:
                 track = next(_generator)
             except StopIteration:
