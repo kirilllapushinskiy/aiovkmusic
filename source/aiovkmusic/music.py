@@ -177,19 +177,30 @@ class Music:
             title=track['title']
         )
 
-    def playlist_tracks(self, playlist: Playlist) -> [Track]:
+    def playlist_tracks(self, playlist: Playlist, count: int = 5, offset: int = 0) -> [Track]:
         """
         Возвращает список аудиозаписей заданного плейлиста.
+        :param count: количество аудиозаписей.
+        :param offset: смещение относительно начала плейлиста.
         :param playlist: Плейлист чьи аудиозаписи нужно вернуть.
         :return: Список аудиозаписей плейлиста.
         """
-        tracks = self._audio.get(
+        _generator = self._audio.get_iter(
             album_id=playlist.id,
             owner_id=playlist.owner_id,
-            access_hash=playlist.access_hash
+            access_hash=playlist.access_hash,
+            offset=offset
         )
-        return [
-            Track(
+
+        tracks = []
+
+        while count:
+            print(count)
+            try:
+                track = next(_generator)
+            except StopIteration:
+                return tracks
+            tracks.append(Track(
                 id=track['id'],
                 owner_id=track['owner_id'],
                 duration=track['duration'],
@@ -197,9 +208,9 @@ class Music:
                 _covers=track['track_covers'],
                 artist=track['artist'],
                 title=track['title']
-            )
-            for track in tracks
-        ]
+            ))
+            count -= 1
+        return tracks
 
     async def download(
             self,

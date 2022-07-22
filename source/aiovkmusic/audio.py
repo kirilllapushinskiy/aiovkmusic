@@ -91,9 +91,10 @@ class VkAudio(object):
 
         self._vk.http.get('https://m.vk.com/')  # load cookies
 
-    def get_iter(self, owner_id=None, album_id=None, access_hash=None):
+    def get_iter(self, owner_id=None, album_id=None, access_hash=None, offset=0):
         """ Получить список аудиозаписей пользователя (по частям)
 
+        :param offset: смещение от начала альбома.
         :param owner_id: ID владельца (отрицательные значения для групп)
         :param album_id: ID альбома
         :param access_hash: ACCESS_HASH альбома
@@ -107,7 +108,6 @@ class VkAudio(object):
         else:
             offset_diff = TRACKS_PER_USER_PAGE
 
-        offset = 0
         while True:
             retries = RETRIES
             raw = self._vk.http.post(
